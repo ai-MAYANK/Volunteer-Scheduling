@@ -18,3 +18,8 @@ Thumbs.db
 
 # Logs
 *.log
+# Stray prisma agent-skill folders
+backend/.agents/
+backend/.claude/
+backend/.cursor/
+backend/.devin/
