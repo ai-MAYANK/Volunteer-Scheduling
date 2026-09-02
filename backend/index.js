@@ -12,3 +12,6 @@ app.get('/', (req, res) => res.json({ status: 'API running' }));
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.use('/api/programs', require('./routes/programs'));
+app.use('/api/shifts', require('./routes/shifts'));
