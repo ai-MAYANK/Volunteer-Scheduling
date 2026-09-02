@@ -22,3 +22,5 @@ app.use('/api/shifts', require('./routes/signups'));
 app.use('/api/notifications', require('./routes/notifications'));
 
 app.use('/api/alerts', require('./routes/alerts'));
+
+app.use('/api/dashboard', require('./routes/dashboard'));
