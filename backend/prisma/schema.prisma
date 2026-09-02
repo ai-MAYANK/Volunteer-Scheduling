@@ -6,3 +6,103 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id              String          @id @default(uuid())
+  name            String
+  email           String          @unique
+  passwordHash    String
+  role            Role
+  createdAt       DateTime        @default(now())
+  memberships     Membership[]
+  notifications   Notification[]
+  programsOwned   Program[]       @relation("CoordinatorPrograms")
+  signups         Signup[]
+  timelineEvents  TimelineEvent[]
+  waitlistEntries Waitlist[]
+}
+
+model Program {
+  id            String       @id @default(uuid())
+  name          String
+  description   String?
+  coordinatorId String
+  createdAt     DateTime     @default(now())
+  memberships   Membership[]
+  coordinator   User         @relation("CoordinatorPrograms", fields: [coordinatorId], references: [id])
+  shifts        Shift[]
+}
+
+model Membership {
+  id        String   @id @default(uuid())
+  userId    String
+  programId String
+  joinedAt  DateTime @default(now())
+  program   Program  @relation(fields: [programId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, programId])
+}
+
+model Shift {
+  id        String     @id @default(uuid())
+  programId String
+  title     String
+  startTime DateTime
+  endTime   DateTime
+  capacity  Int
+  isClosed  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  program   Program    @relation(fields: [programId], references: [id])
+  signups   Signup[]
+  waitlist  Waitlist[]
+}
+
+model Signup {
+  id          String   @id @default(uuid())
+  shiftId     String
+  volunteerId String
+  createdAt   DateTime @default(now())
+  shift       Shift    @relation(fields: [shiftId], references: [id])
+  volunteer   User     @relation(fields: [volunteerId], references: [id])
+
+  @@unique([shiftId, volunteerId])
+}
+
+model Waitlist {
+  id          String   @id @default(uuid())
+  shiftId     String
+  volunteerId String
+  createdAt   DateTime @default(now())
+  shift       Shift    @relation(fields: [shiftId], references: [id])
+  volunteer   User     @relation(fields: [volunteerId], references: [id])
+
+  @@unique([shiftId, volunteerId])
+}
+
+model Notification {
+  id                String   @id @default(uuid())
+  userId            String
+  message           String
+  relatedEntityType String
+  relatedEntityId   String
+  isRead            Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+model TimelineEvent {
+  id         String   @id @default(uuid())
+  entityType String
+  entityId   String
+  action     String
+  actorId    String
+  details    String?
+  createdAt  DateTime @default(now())
+  actor      User     @relation(fields: [actorId], references: [id])
+}
+
+enum Role {
+  COORDINATOR
+  VOLUNTEER
+}
