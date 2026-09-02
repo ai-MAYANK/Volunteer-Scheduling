@@ -39,17 +39,6 @@ router.post('/', requireAuth, requireRole('COORDINATOR'), async (req, res) => {
   res.status(201).json(shift);
 });
 
-// List shifts (basic version — filters added later)
-router.get('/', requireAuth, async (req, res) => {
-  const shifts = await prisma.shift.findMany({
-    include: { signups: true, program: { select: { name: true } } },
-    orderBy: { startTime: 'asc' },
-  });
-  const withStatus = shifts.map(s => ({ ...s, fillStatus: getFillStatus(s) }));
-  res.json(withStatus);
-});
-
-// Get one shift with full detail
 // List shifts with search, filter, and pagination
 router.get('/', requireAuth, async (req, res) => {
   const { programId, status, search, page = 1, limit = 10 } = req.query;
@@ -81,6 +70,16 @@ router.get('/', requireAuth, async (req, res) => {
     data: withStatus,
     pagination: { page: parseInt(page), limit: parseInt(limit), total },
   });
+});
+
+// Get one shift with full detail
+router.get('/:id', requireAuth, async (req, res) => {
+  const shift = await prisma.shift.findUnique({
+    where: { id: req.params.id },
+    include: { signups: { include: { volunteer: { select: { name: true, email: true } } } }, waitlist: true, program: true },
+  });
+  if (!shift) return res.status(404).json({ error: 'shift not found' });
+  res.json({ ...shift, fillStatus: getFillStatus(shift) });
 });
 
 // Generate recurring shifts (coordinator only) — e.g. weekly for N occurrences
