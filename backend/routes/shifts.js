@@ -50,13 +50,37 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 // Get one shift with full detail
-router.get('/:id', requireAuth, async (req, res) => {
-  const shift = await prisma.shift.findUnique({
-    where: { id: req.params.id },
-    include: { signups: { include: { volunteer: { select: { name: true, email: true } } } }, waitlist: true, program: true },
+// List shifts with search, filter, and pagination
+router.get('/', requireAuth, async (req, res) => {
+  const { programId, status, search, page = 1, limit = 10 } = req.query;
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const where = {};
+  if (programId) where.programId = programId;
+  if (search) where.title = { contains: search, mode: 'insensitive' };
+
+  const [shifts, total] = await Promise.all([
+    prisma.shift.findMany({
+      where,
+      include: { signups: true, program: { select: { name: true } } },
+      orderBy: { startTime: 'asc' },
+      skip,
+      take: parseInt(limit),
+    }),
+    prisma.shift.count({ where }),
+  ]);
+
+  let withStatus = shifts.map(s => ({ ...s, fillStatus: getFillStatus(s) }));
+
+  // status filter is applied after computing fillStatus, since it's derived, not a DB column
+  if (status) {
+    withStatus = withStatus.filter(s => s.fillStatus === status.toUpperCase());
+  }
+
+  res.json({
+    data: withStatus,
+    pagination: { page: parseInt(page), limit: parseInt(limit), total },
   });
-  if (!shift) return res.status(404).json({ error: 'shift not found' });
-  res.json({ ...shift, fillStatus: getFillStatus(shift) });
 });
 
 module.exports = router;

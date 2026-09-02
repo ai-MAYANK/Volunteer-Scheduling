@@ -18,3 +18,7 @@ app.use('/api/programs', require('./routes/programs'));
 app.use('/api/shifts', require('./routes/shifts'));
 
 app.use('/api/shifts', require('./routes/signups'));
+
+app.use('/api/notifications', require('./routes/notifications'));
+
+app.use('/api/alerts', require('./routes/alerts'));
