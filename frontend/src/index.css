@@ -2,29 +2,59 @@
 
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #ffffff;
-  color: #222;
+  font-family: Georgia, "Times New Roman", serif;
+  background: #fafafa;
+  color: #2b2b2b;
+  line-height: 1.5;
 }
 
-input, select, button {
-  font-family: inherit;
+h1, h2, h3, h4 {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1a1a1a;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+}
+
+input, select, button, textarea {
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 14px;
-  padding: 6px 8px;
 }
 
 input, select {
-  border: 1px solid #999;
+  border: 1px solid #b3b3b3;
+  border-radius: 3px;
+  padding: 7px 9px;
+  background: #fff;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #5a6b8c;
 }
 
 button {
-  background: #f0f0f0;
-  border: 1px solid #999;
+  background: #5a6b8c;
+  color: #fff;
+  border: 1px solid #4a5a78;
+  border-radius: 3px;
+  padding: 7px 14px;
   cursor: pointer;
 }
 
-button:hover {
-  background: #e0e0e0;
+button:hover { background: #4a5a78; }
+
+button:disabled { background: #ccc; border-color: #ccc; cursor: not-allowed; }
+
+a { color: #3a5a9c; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+table { font-size: 14px; }
+
+th { font-family: Arial, Helvetica, sans-serif; font-weight: 600; color: #444; }
+
+form {
+  background: #fff;
+  border-radius: 4px;
 }
 
-a { color: #0645ad; }
+li { margin-bottom: 4px; }

@@ -26,6 +26,7 @@ model Program {
   id            String       @id @default(uuid())
   name          String
   description   String?
+  isArchived    Boolean      @default(false)
   coordinatorId String
   createdAt     DateTime     @default(now())
   memberships   Membership[]
@@ -45,15 +46,18 @@ model Membership {
 }
 
 model Shift {
-  id        String     @id @default(uuid())
-  programId String
-  title     String
-  startTime DateTime
-  endTime   DateTime
-  capacity  Int
-  isClosed  Boolean    @default(false)
-  createdAt DateTime   @default(now())
-  program   Program    @relation(fields: [programId], references: [id])
+  id          String    @id @default(uuid())
+  programId   String
+  program     Program   @relation(fields: [programId], references: [id])
+  title       String
+  location    String
+  startTime   DateTime
+  endTime     DateTime
+  capacity    Int
+  isClosed    Boolean   @default(false)
+  dismissedAt DateTime?
+  createdAt   DateTime  @default(now())
+
   signups   Signup[]
   waitlist  Waitlist[]
 }
@@ -96,10 +100,12 @@ model TimelineEvent {
   entityType String
   entityId   String
   action     String
+  oldState   String?
+  newState   String?
   actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
   details    String?
   createdAt  DateTime @default(now())
-  actor      User     @relation(fields: [actorId], references: [id])
 }
 
 enum Role {

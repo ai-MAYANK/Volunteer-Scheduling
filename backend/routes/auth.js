@@ -12,18 +12,29 @@ router.post('/signup', async (req, res) => {
   if (!name || !email || !password || !role) {
     return res.status(400).json({ error: 'name, email, password, and role are required' });
   }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'please enter a valid email address' });
+  }
+  const normalizedEmail = email.toLowerCase();
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'password must be at least 6 characters' });
+  }
+
   if (!['COORDINATOR', 'VOLUNTEER'].includes(role)) {
     return res.status(400).json({ error: 'role must be COORDINATOR or VOLUNTEER' });
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } });
+  const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   if (existing) {
     return res.status(409).json({ error: 'email already registered' });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { name, email, passwordHash, role },
+    data: { name, email: normalizedEmail, passwordHash, role },
   });
 
   const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -32,8 +43,12 @@ router.post('/signup', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'email and password are required' });
+  }
+  const normalizedEmail = email.toLowerCase();
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   if (!user) {
     return res.status(401).json({ error: 'invalid email or password' });
   }
